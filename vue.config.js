@@ -7,7 +7,8 @@ module.exports = {
       // 匹配所有以 /api 开头的url
       "/api": {
         target: "http://localhost:8080",
-        changeOrigin: true
+        changeOrigin: true,
+        ws: true
       }
     }
   }

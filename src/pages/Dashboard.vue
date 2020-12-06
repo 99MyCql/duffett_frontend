@@ -229,6 +229,36 @@
         </md-card>
       </div>
 
+      <md-dialog :md-active.sync="monitorDialog">
+        <md-dialog-title>参数设置</md-dialog-title>
+
+        <div style="width: 80%;margin: 0px 10% 10px;">
+          <md-field>
+            <label>策略</label>
+            <md-select v-model="monitorReqData.strategy_name">
+              <md-option value="randStrategy">随机策略</md-option>
+            </md-select>
+          </md-field>
+          <md-field>
+            <label>监听频率</label>
+            <md-select v-model="monitorReqData.monitor_freq">
+              <md-option value="1">1s</md-option>
+              <md-option value="5">5s</md-option>
+              <md-option value="10">10s</md-option>
+            </md-select>
+          </md-field>
+        </div>
+
+        <md-dialog-actions>
+          <md-button class="md-raised" @click="monitorDialog = false">
+            取消
+          </md-button>
+          <md-button class="md-primary" @click="monitorDialog = false">
+            确定
+          </md-button>
+        </md-dialog-actions>
+      </md-dialog>
+
       <div
         class="md-layout-item md-medium-size-100 md-xsmall-size-100 md-size-50"
       >
@@ -249,13 +279,12 @@
                     <md-table-cell>{{ item[3] }}</md-table-cell>
                     <md-table-cell>{{ item[4] }}</md-table-cell>
                     <md-table-cell>
-                      <md-button class="md-just-icon md-simple md-primary">
+                      <md-button
+                        class="md-just-icon md-simple md-primary"
+                        @click="monitorDialog = true"
+                      >
                         <md-icon>add</md-icon>
                         <md-tooltip md-direction="top">添加监听</md-tooltip>
-                      </md-button>
-                      <md-button class="md-just-icon md-simple md-danger">
-                        <md-icon>close</md-icon>
-                        <md-tooltip md-direction="top">取消监听</md-tooltip>
                       </md-button>
                     </md-table-cell>
                   </md-table-row>
@@ -264,7 +293,7 @@
 
               <md-tab id="tab-pages" md-label="已监听" md-icon="alarm_on">
                 <md-table
-                  v-model="stocks"
+                  v-model="monitoringStocks"
                   class="md-scrollbar"
                   style="max-height: 400px;overflow: auto;"
                 >
@@ -278,28 +307,6 @@
                       <md-button class="md-just-icon md-simple md-danger">
                         <md-icon>close</md-icon>
                         <md-tooltip md-direction="top">取消监听</md-tooltip>
-                      </md-button>
-                    </md-table-cell>
-                  </md-table-row>
-                </md-table>
-              </md-tab>
-
-              <md-tab id="tab-posts" md-label="未监听" md-icon="alarm_off">
-                <md-table
-                  v-model="stocks"
-                  class="md-scrollbar"
-                  style="max-height: 400px;overflow: auto;"
-                >
-                  <md-table-row slot="md-table-row" slot-scope="{ item }">
-                    <md-table-cell>{{ item[0] }}</md-table-cell>
-                    <md-table-cell>{{ item[1] }}</md-table-cell>
-                    <md-table-cell>{{ item[2] }}</md-table-cell>
-                    <md-table-cell>{{ item[3] }}</md-table-cell>
-                    <md-table-cell>{{ item[4] }}</md-table-cell>
-                    <md-table-cell>
-                      <md-button class="md-just-icon md-simple md-primary">
-                        <md-icon>add</md-icon>
-                        <md-tooltip md-direction="top">添加监听</md-tooltip>
                       </md-button>
                     </md-table-cell>
                   </md-table-row>
@@ -316,6 +323,8 @@
 <script>
 import { StatsCard, ChartCard, NavTabsCard } from "@/components";
 import tushareApi from "@/api/tushare";
+import newMonitorWS from "@/api/monitor";
+import rspDataHandler from "@/api/rspDataHandler";
 import formatDate from "@/utils/date";
 
 export default {
@@ -429,7 +438,16 @@ export default {
           state: "出错"
         }
       ],
-      stocks: []
+      stocks: [],
+      monitoringStocks: [],
+      ws: null,
+      monitorDialog: false,
+      monitorReqData: {
+        op: "",
+        ts_code: "",
+        strategy_name: "",
+        monitor_freq: 0
+      }
     };
   },
   methods: {
@@ -510,6 +528,25 @@ export default {
         .catch(function(error) {
           console.log(error);
         });
+    },
+    initMonitorWS() {
+      this.ws = newMonitorWS(this.monitorWS_onmsg);
+      // let that = this;
+      // setTimeout(function() {
+      //   that.ws.send(
+      //     JSON.stringify({
+      //       op: "startMonitor",
+      //       ts_code: "000005.SH",
+      //       strategy_name: "randStrategy",
+      //       monitor_freq: 10
+      //     })
+      //   );
+      // }, 5000);
+    },
+    monitorWS_onmsg(rsp) {
+      let data = JSON.parse(rsp.data);
+      console.log("ws response data:", data);
+      rspDataHandler(data);
     }
   },
   created() {
@@ -517,6 +554,7 @@ export default {
     this.getSZSTockIndex();
     this.getGEMSTockIndex();
     this.getStocks();
+    this.initMonitorWS();
   }
 };
 </script>
