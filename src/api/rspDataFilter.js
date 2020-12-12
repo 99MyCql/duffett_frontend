@@ -11,7 +11,7 @@ const SERVER_ERR_CODE = 2; // 服务端端出现错误
 //   data: "{username:dounine}"
 // }
 
-const rspDataHandler = function(data) {
+const rspDataFilter = function(data) {
   if (data.code === SUC_CODE) {
     console.log("response: success");
     if (data.msg != "") {
@@ -59,4 +59,4 @@ const rspDataHandler = function(data) {
   }
 };
 
-export default rspDataHandler;
+export default rspDataFilter;

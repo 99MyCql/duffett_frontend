@@ -1,7 +1,7 @@
 import axios from "axios";
 import VUE from "../main";
 import store from "@/store/store";
-import rspDataHandler from "./rspDataHandler";
+import rspDataFilter from "./rspDataFilter";
 
 // 不需要 token 验证的 URL
 const NOT_AUTH_URLS = ["/api/v1/user/login", "/api/v1/user/register"];
@@ -30,7 +30,7 @@ myAxios.interceptors.response.use(
     let data = resp.data; // 获取后端返回的数据
     console.log("response data:", data);
 
-    if (rspDataHandler(data)) {
+    if (rspDataFilter(data)) {
       return resp; // 转由.then()接收
     } else {
       return Promise.reject(resp); // 转由.catch()接收

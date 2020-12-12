@@ -207,21 +207,27 @@
               class="md-scrollbar"
               style="max-height: 400px;overflow: auto;"
             >
-              <md-table-row slot="md-table-row" slot-scope="{ item }">
+              <md-table-row slot="md-table-row" slot-scope="{ item, index }">
                 <md-table-cell md-label="#">
-                  {{ item.id }}
+                  {{ index }}
                 </md-table-cell>
                 <md-table-cell md-label="股票名">
-                  {{ item.stockName }}
+                  {{ item.StockName }}
+                </md-table-cell>
+                <md-table-cell md-label="策略名">
+                  {{ item.StrategyName }}
                 </md-table-cell>
                 <md-table-cell md-label="交易金额">
-                  {{ item.money }}
+                  {{ item.Money }}
                 </md-table-cell>
                 <md-table-cell md-label="创建时间">
-                  {{ item.createdAt }}
+                  {{ item.CreatedAt }}
+                </md-table-cell>
+                <md-table-cell md-label="更新时间">
+                  {{ item.UpdatedAt }}
                 </md-table-cell>
                 <md-table-cell md-label="状态">
-                  {{ item.state }}
+                  {{ item.State }}
                 </md-table-cell>
               </md-table-row>
             </md-table>
@@ -231,7 +237,6 @@
 
       <md-dialog :md-active.sync="monitorDialog">
         <md-dialog-title>参数设置</md-dialog-title>
-
         <div style="width: 80%;margin: 0px 10% 10px;">
           <md-field>
             <label>策略</label>
@@ -242,18 +247,18 @@
           <md-field>
             <label>监听频率</label>
             <md-select v-model="monitorReqData.monitor_freq">
-              <md-option value="1">1s</md-option>
-              <md-option value="5">5s</md-option>
-              <md-option value="10">10s</md-option>
+              <md-option :value="1">1s</md-option>
+              <md-option :value="5">5s</md-option>
+              <md-option :value="10">10s</md-option>
+              <md-option :value="30">30s</md-option>
             </md-select>
           </md-field>
         </div>
-
         <md-dialog-actions>
           <md-button class="md-raised" @click="monitorDialog = false">
             取消
           </md-button>
-          <md-button class="md-primary" @click="monitorDialog = false">
+          <md-button class="md-primary" @click="startMonitor">
             确定
           </md-button>
         </md-dialog-actions>
@@ -272,7 +277,10 @@
                   class="md-scrollbar"
                   style="max-height: 400px;overflow: auto;"
                 >
-                  <md-table-row slot="md-table-row" slot-scope="{ item }">
+                  <md-table-row
+                    slot="md-table-row"
+                    slot-scope="{ item, index }"
+                  >
                     <md-table-cell>{{ item[0] }}</md-table-cell>
                     <md-table-cell>{{ item[1] }}</md-table-cell>
                     <md-table-cell>{{ item[2] }}</md-table-cell>
@@ -281,7 +289,11 @@
                     <md-table-cell>
                       <md-button
                         class="md-just-icon md-simple md-primary"
-                        @click="monitorDialog = true"
+                        @click="
+                          monitorStockIndex = index;
+                          monitorReqData.ts_code = item[0];
+                          monitorDialog = true;
+                        "
                       >
                         <md-icon>add</md-icon>
                         <md-tooltip md-direction="top">添加监听</md-tooltip>
@@ -324,7 +336,7 @@
 import { StatsCard, ChartCard, NavTabsCard } from "@/components";
 import tushareApi from "@/api/tushare";
 import newMonitorWS from "@/api/monitor";
-import rspDataHandler from "@/api/rspDataHandler";
+import rspDataFilter from "@/api/rspDataFilter";
 import formatDate from "@/utils/date";
 
 export default {
@@ -401,47 +413,12 @@ export default {
           }
         }
       },
-      orders: [
-        {
-          id: 1,
-          stockName: "平安银行",
-          money: "$538",
-          createdAt: "2020/11/20",
-          state: "报单中"
-        },
-        {
-          id: 2,
-          stockName: "广发银行",
-          money: "$738",
-          createdAt: "2020/11/20",
-          state: "已成交"
-        },
-        {
-          id: 3,
-          stockName: "平安银行",
-          money: "$558",
-          createdAt: "2020/11/20",
-          state: "撤单中"
-        },
-        {
-          id: 4,
-          stockName: "平安银行",
-          money: "-$128",
-          createdAt: "2020/11/20",
-          state: "已撤单"
-        },
-        {
-          id: 5,
-          stockName: "平安银行",
-          money: "$324",
-          createdAt: "2020/11/20",
-          state: "出错"
-        }
-      ],
+      orders: [],
       stocks: [],
       monitoringStocks: [],
       ws: null,
       monitorDialog: false,
+      monitorStockIndex: 0,
       monitorReqData: {
         op: "",
         ts_code: "",
@@ -451,7 +428,7 @@ export default {
     };
   },
   methods: {
-    handleItems(items, targetStockIndex) {
+    handleStockItems(items, targetStockIndex) {
       let high = 0;
       let low = 100000;
       for (let i = 0; i < items.length; i++) {
@@ -478,7 +455,7 @@ export default {
       })
         .then(function(response) {
           console.log(response.data.data);
-          that.handleItems(response.data.data.items, that.SHStockIndex);
+          that.handleStockItems(response.data.data.items, that.SHStockIndex);
         })
         .catch(function(error) {
           console.log(error);
@@ -493,7 +470,7 @@ export default {
       })
         .then(function(response) {
           console.log(response.data.data);
-          that.handleItems(response.data.data.items, that.SZStockIndex);
+          that.handleStockItems(response.data.data.items, that.SZStockIndex);
         })
         .catch(function(error) {
           console.log(error);
@@ -508,7 +485,7 @@ export default {
       })
         .then(function(response) {
           console.log(response.data.data);
-          that.handleItems(response.data.data.items, that.GEMStockIndex);
+          that.handleStockItems(response.data.data.items, that.GEMStockIndex);
         })
         .catch(function(error) {
           console.log(error);
@@ -531,22 +508,21 @@ export default {
     },
     initMonitorWS() {
       this.ws = newMonitorWS(this.monitorWS_onmsg);
-      // let that = this;
-      // setTimeout(function() {
-      //   that.ws.send(
-      //     JSON.stringify({
-      //       op: "startMonitor",
-      //       ts_code: "000005.SH",
-      //       strategy_name: "randStrategy",
-      //       monitor_freq: 10
-      //     })
-      //   );
-      // }, 5000);
     },
     monitorWS_onmsg(rsp) {
       let data = JSON.parse(rsp.data);
       console.log("ws response data:", data);
-      rspDataHandler(data);
+      if (rspDataFilter(data)) {
+        if (data.data != null) this.orders.push(data.data);
+      }
+    },
+    startMonitor() {
+      this.monitorReqData.op = "startMonitor";
+      console.log(this.monitorReqData);
+      this.ws.send(JSON.stringify(this.monitorReqData));
+      this.monitorDialog = false;
+      this.monitoringStocks.push(this.stocks[this.monitorStockIndex]);
+      this.stocks.splice(this.monitorStockIndex, this.monitorStockIndex);
     }
   },
   created() {
