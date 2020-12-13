@@ -28,7 +28,7 @@ myAxios.interceptors.request.use(
 myAxios.interceptors.response.use(
   resp => {
     let data = resp.data; // 获取后端返回的数据
-    console.log("response data:", data);
+    console.log(resp.config.url, "response:", data);
 
     if (rspDataFilter(data)) {
       return resp; // 转由.then()接收

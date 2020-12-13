@@ -198,7 +198,7 @@
         <md-card>
           <md-card-header data-background-color="orange">
             <h4 class="title">交易中订单</h4>
-            <p class="category">updated 30 minutes ago</p>
+            <p class="category">实时更新</p>
           </md-card-header>
           <md-card-content>
             <md-table
@@ -235,18 +235,18 @@
         </md-card>
       </div>
 
-      <md-dialog :md-active.sync="monitorDialog">
+      <md-dialog :md-active.sync="startMonitorData.dialog">
         <md-dialog-title>参数设置</md-dialog-title>
         <div style="width: 80%;margin: 0px 10% 10px;">
           <md-field>
             <label>策略</label>
-            <md-select v-model="monitorReqData.strategy_name">
+            <md-select v-model="startMonitorData.strategy_name">
               <md-option value="randStrategy">随机策略</md-option>
             </md-select>
           </md-field>
           <md-field>
             <label>监听频率</label>
-            <md-select v-model="monitorReqData.monitor_freq">
+            <md-select v-model="startMonitorData.monitor_freq">
               <md-option :value="1">1s</md-option>
               <md-option :value="5">5s</md-option>
               <md-option :value="10">10s</md-option>
@@ -255,10 +255,22 @@
           </md-field>
         </div>
         <md-dialog-actions>
-          <md-button class="md-raised" @click="monitorDialog = false">
+          <md-button class="md-raised" @click="startMonitorData.dialog = false">
             取消
           </md-button>
           <md-button class="md-primary" @click="startMonitor">
+            确定
+          </md-button>
+        </md-dialog-actions>
+      </md-dialog>
+
+      <md-dialog :md-active.sync="stopMonitorData.dialog">
+        <md-dialog-title>确定要停止监听吗？</md-dialog-title>
+        <md-dialog-actions>
+          <md-button class="md-raised" @click="stopMonitorData.dialog = false">
+            取消
+          </md-button>
+          <md-button class="md-primary" @click="stopMonitor">
             确定
           </md-button>
         </md-dialog-actions>
@@ -290,9 +302,9 @@
                       <md-button
                         class="md-just-icon md-simple md-primary"
                         @click="
-                          monitorStockIndex = index;
-                          monitorReqData.ts_code = item[0];
-                          monitorDialog = true;
+                          startMonitorData.stocksId = index;
+                          startMonitorData.ts_code = item[0];
+                          startMonitorData.dialog = true;
                         "
                       >
                         <md-icon>add</md-icon>
@@ -309,14 +321,24 @@
                   class="md-scrollbar"
                   style="max-height: 400px;overflow: auto;"
                 >
-                  <md-table-row slot="md-table-row" slot-scope="{ item }">
+                  <md-table-row
+                    slot="md-table-row"
+                    slot-scope="{ item, index }"
+                  >
                     <md-table-cell>{{ item[0] }}</md-table-cell>
                     <md-table-cell>{{ item[1] }}</md-table-cell>
                     <md-table-cell>{{ item[2] }}</md-table-cell>
                     <md-table-cell>{{ item[3] }}</md-table-cell>
                     <md-table-cell>{{ item[4] }}</md-table-cell>
                     <md-table-cell>
-                      <md-button class="md-just-icon md-simple md-danger">
+                      <md-button
+                        class="md-just-icon md-simple md-danger"
+                        @click="
+                          stopMonitorData.monitoringStocksId = index;
+                          stopMonitorData.ts_code = item[0];
+                          stopMonitorData.dialog = true;
+                        "
+                      >
                         <md-icon>close</md-icon>
                         <md-tooltip md-direction="top">取消监听</md-tooltip>
                       </md-button>
@@ -337,6 +359,7 @@ import { StatsCard, ChartCard, NavTabsCard } from "@/components";
 import tushareApi from "@/api/tushare";
 import newMonitorWS from "@/api/monitor";
 import rspDataFilter from "@/api/rspDataFilter";
+import getMS from "@/api/stock";
 import formatDate from "@/utils/date";
 
 export default {
@@ -349,7 +372,6 @@ export default {
     return {
       today: new Date(),
       preDay: new Date(new Date().getTime() - 28 * 24 * 3600 * 1000),
-      newStockName: "",
       SHStockIndex: {
         load: false,
         change: 0,
@@ -416,14 +438,18 @@ export default {
       orders: [],
       stocks: [],
       monitoringStocks: [],
-      ws: null,
-      monitorDialog: false,
-      monitorStockIndex: 0,
-      monitorReqData: {
-        op: "",
+      monitorWS: null,
+      startMonitorData: {
+        dialog: false,
+        stocksId: 0,
         ts_code: "",
         strategy_name: "",
         monitor_freq: 0
+      },
+      stopMonitorData: {
+        dialog: false,
+        monitoringStocksId: 0,
+        ts_code: ""
       }
     };
   },
@@ -506,23 +532,66 @@ export default {
           console.log(error);
         });
     },
+    getMonitoringStocks() {
+      let that = this;
+      getMS()
+        .then(function(response) {
+          let stocks = response.data.data;
+          console.log(stocks);
+          for (let i = 0; i < stocks.length; i++) {
+            tushareApi(
+              "stock_basic",
+              { ts_code: stocks[i].TsCode },
+              "ts_code,name,area,industry,list_date"
+            )
+              .then(function(response) {
+                that.monitoringStocks.push(response.data.data.items[0]);
+              })
+              .catch(function(error) {
+                console.log(error);
+              });
+          }
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    },
     initMonitorWS() {
-      this.ws = newMonitorWS(this.monitorWS_onmsg);
+      this.monitorWS = newMonitorWS(this.monitorWS_onmsg);
     },
     monitorWS_onmsg(rsp) {
       let data = JSON.parse(rsp.data);
-      console.log("ws response data:", data);
+      console.log("monitorWS response data:", data);
       if (rspDataFilter(data)) {
         if (data.data != null) this.orders.push(data.data);
       }
     },
     startMonitor() {
-      this.monitorReqData.op = "startMonitor";
-      console.log(this.monitorReqData);
-      this.ws.send(JSON.stringify(this.monitorReqData));
-      this.monitorDialog = false;
-      this.monitoringStocks.push(this.stocks[this.monitorStockIndex]);
-      this.stocks.splice(this.monitorStockIndex, this.monitorStockIndex);
+      console.log(this.startMonitorData);
+      this.monitorWS.send(
+        JSON.stringify({
+          op: "startMonitor",
+          ts_code: this.startMonitorData.ts_code,
+          strategy_name: this.startMonitorData.strategy_name,
+          monitor_freq: this.startMonitorData.monitor_freq
+        })
+      );
+      this.startMonitorData.dialog = false;
+      this.monitoringStocks.push(this.stocks[this.startMonitorData.stocksId]);
+    },
+    stopMonitor() {
+      console.log(this.stopMonitorData);
+      this.monitorWS.send(
+        JSON.stringify({
+          op: "stopMonitor",
+          ts_code: this.stopMonitorData.ts_code
+        })
+      );
+      this.stopMonitorData.dialog = false;
+      this.monitoringStocks = this.monitoringStocks.splice(
+        this.stopMonitorData.monitoringStocksId,
+        this.stopMonitorData.monitoringStocksId
+      );
     }
   },
   created() {
@@ -530,6 +599,7 @@ export default {
     this.getSZSTockIndex();
     this.getGEMSTockIndex();
     this.getStocks();
+    this.getMonitoringStocks();
     this.initMonitorWS();
   }
 };

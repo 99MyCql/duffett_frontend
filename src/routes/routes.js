@@ -17,12 +17,12 @@ const routes = [
     children: [
       {
         path: "dashboard",
-        name: "Dashboard",
+        name: "统计面板",
         component: Dashboard
       },
       {
         path: "user",
-        name: "User Profile",
+        name: "个人信息",
         component: UserProfile
       },
       {
@@ -42,7 +42,7 @@ const routes = [
       },
       {
         path: "notifications",
-        name: "Notifications",
+        name: "通知",
         component: Notifications
       }
     ]
