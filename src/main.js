@@ -31,6 +31,9 @@ import MaterialDashboard from "./material-dashboard";
 
 import Chartist from "chartist";
 
+// date format
+import format from "@/utils/date";
+
 // configure router
 const router = new VueRouter({
   routes, // short for routes: routes
@@ -38,6 +41,7 @@ const router = new VueRouter({
 });
 
 Vue.prototype.$Chartist = Chartist;
+Date.prototype.format = format;
 
 Vue.use(VueRouter);
 Vue.use(MaterialDashboard);

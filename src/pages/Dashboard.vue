@@ -241,7 +241,7 @@
           <md-field>
             <label>策略</label>
             <md-select v-model="startMonitorData.strategy_name">
-              <md-option value="randStrategy">随机策略</md-option>
+              <md-option value="随机策略">随机策略</md-option>
             </md-select>
           </md-field>
           <md-field>
@@ -264,13 +264,16 @@
         </md-dialog-actions>
       </md-dialog>
 
-      <md-dialog :md-active.sync="stopMonitorData.dialog">
+      <md-dialog :md-active.sync="finishMonitorData.dialog">
         <md-dialog-title>确定要停止监听吗？</md-dialog-title>
         <md-dialog-actions>
-          <md-button class="md-raised" @click="stopMonitorData.dialog = false">
+          <md-button
+            class="md-raised"
+            @click="finishMonitorData.dialog = false"
+          >
             取消
           </md-button>
-          <md-button class="md-primary" @click="stopMonitor">
+          <md-button class="md-primary" @click="finishMonitor">
             确定
           </md-button>
         </md-dialog-actions>
@@ -334,9 +337,9 @@
                       <md-button
                         class="md-just-icon md-simple md-danger"
                         @click="
-                          stopMonitorData.monitoringStocksId = index;
-                          stopMonitorData.ts_code = item[0];
-                          stopMonitorData.dialog = true;
+                          finishMonitorData.monitoringStocksId = index;
+                          finishMonitorData.ts_code = item[0];
+                          finishMonitorData.dialog = true;
                         "
                       >
                         <md-icon>close</md-icon>
@@ -359,8 +362,7 @@ import { StatsCard, ChartCard, NavTabsCard } from "@/components";
 import tushareApi from "@/api/tushare";
 import newMonitorWS from "@/api/monitor";
 import rspDataFilter from "@/api/rspDataFilter";
-import getMS from "@/api/stock";
-import formatDate from "@/utils/date";
+import { getMonitoringStocks as getMS } from "@/api/stock";
 
 export default {
   components: {
@@ -370,8 +372,10 @@ export default {
   },
   data() {
     return {
-      today: new Date(),
-      preDay: new Date(new Date().getTime() - 28 * 24 * 3600 * 1000),
+      today: new Date().format("yyyyMMdd"),
+      preDay: new Date(new Date().getTime() - 28 * 24 * 3600 * 1000).format(
+        "yyyyMMdd"
+      ),
       SHStockIndex: {
         load: false,
         change: 0,
@@ -446,7 +450,7 @@ export default {
         strategy_name: "",
         monitor_freq: 0
       },
-      stopMonitorData: {
+      finishMonitorData: {
         dialog: false,
         monitoringStocksId: 0,
         ts_code: ""
@@ -476,8 +480,8 @@ export default {
       let that = this;
       tushareApi("index_daily", {
         ts_code: "000001.SH",
-        start_date: formatDate(that.preDay),
-        end_date: formatDate(that.today)
+        start_date: that.preDay,
+        end_date: that.today
       })
         .then(function(response) {
           console.log(response.data.data);
@@ -491,8 +495,8 @@ export default {
       let that = this;
       tushareApi("index_daily", {
         ts_code: "399001.SZ",
-        start_date: formatDate(that.preDay),
-        end_date: formatDate(that.today)
+        start_date: that.preDay,
+        end_date: that.today
       })
         .then(function(response) {
           console.log(response.data.data);
@@ -506,8 +510,8 @@ export default {
       let that = this;
       tushareApi("index_daily", {
         ts_code: "399006.SZ",
-        start_date: formatDate(that.preDay),
-        end_date: formatDate(that.today)
+        start_date: that.preDay,
+        end_date: that.today
       })
         .then(function(response) {
           console.log(response.data.data);
@@ -579,19 +583,20 @@ export default {
       this.startMonitorData.dialog = false;
       this.monitoringStocks.push(this.stocks[this.startMonitorData.stocksId]);
     },
-    stopMonitor() {
-      console.log(this.stopMonitorData);
+    finishMonitor() {
+      console.log(this.finishMonitorData);
       this.monitorWS.send(
         JSON.stringify({
-          op: "stopMonitor",
-          ts_code: this.stopMonitorData.ts_code
+          op: "finishMonitor",
+          ts_code: this.finishMonitorData.ts_code
         })
       );
-      this.stopMonitorData.dialog = false;
-      this.monitoringStocks = this.monitoringStocks.splice(
-        this.stopMonitorData.monitoringStocksId,
-        this.stopMonitorData.monitoringStocksId
+      this.finishMonitorData.dialog = false;
+      this.monitoringStocks.splice(
+        this.finishMonitorData.monitoringStocksId,
+        1
       );
+      console.log(this.monitoringStocks);
     }
   },
   created() {

@@ -16,9 +16,9 @@
         <md-icon>person</md-icon>
         <p>User Profile</p>
       </sidebar-link> -->
-      <sidebar-link to="/table">
+      <sidebar-link to="/stockList">
         <md-icon>content_paste</md-icon>
-        <p>交易记录</p>
+        <p>监听记录</p>
       </sidebar-link>
       <sidebar-link to="/typography">
         <md-icon>library_books</md-icon>

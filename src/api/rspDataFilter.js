@@ -13,7 +13,7 @@ const SERVER_ERR_CODE = 2; // 服务端端出现错误
 
 const rspDataFilter = function(data) {
   if (data.code === SUC_CODE) {
-    console.log("response: success");
+    console.log("response code: success");
     if (data.msg != "") {
       VUE.$notify({
         message: data.msg,
@@ -26,7 +26,7 @@ const rspDataFilter = function(data) {
     return true;
   } else if (data.code === CLIENT_ERR_CODE) {
     // 客户端错误
-    console.log("response: client error");
+    console.log("response code: client error");
     VUE.$notify({
       message: data.msg,
       icon: "add_alert",
@@ -37,7 +37,7 @@ const rspDataFilter = function(data) {
     return false;
   } else if (data.code === SERVER_ERR_CODE) {
     // 服务端错误
-    console.log("response: server error");
+    console.log("response code: server error");
     VUE.$notify({
       message: "服务器发生了一些错误",
       icon: "add_alert",
