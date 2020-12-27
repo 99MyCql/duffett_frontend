@@ -11,7 +11,7 @@ var myAxios = axios.create();
 // 添加请求拦截器
 myAxios.interceptors.request.use(
   function(config) {
-    console.log("request url:", config.url);
+    console.log("===> request url:", config.url, config);
     // 如果 URL 不在 NOT_AUTH_URLS 中，则需要加上 token
     if (!(config.url in NOT_AUTH_URLS)) {
       config.headers = { Authorization: "Bearer " + store.token };
@@ -28,7 +28,7 @@ myAxios.interceptors.request.use(
 myAxios.interceptors.response.use(
   resp => {
     let data = resp.data; // 获取后端返回的数据
-    console.log(resp.config.url, "response:", data);
+    console.log("<=== response url:", resp.config.url, resp.data);
 
     if (rspDataFilter(data)) {
       return resp; // 转由.then()接收

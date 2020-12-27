@@ -3,8 +3,8 @@ import DashboardLayout from "@/pages/Layout/DashboardLayout.vue";
 import Dashboard from "@/pages/Dashboard.vue";
 import UserProfile from "@/pages/UserProfile.vue";
 import StockList from "@/pages/StockList.vue";
+import OrderList from "@/pages/OrderList.vue";
 import Typography from "@/pages/Typography.vue";
-import Icons from "@/pages/Icons.vue";
 import Notifications from "@/pages/Notifications.vue";
 import Login from "@/pages/Login.vue";
 import Register from "@/pages/Register.vue";
@@ -31,14 +31,15 @@ const routes = [
         component: StockList
       },
       {
+        path: "orderList/:stockId",
+        name: "交易记录",
+        component: OrderList,
+        props: true
+      },
+      {
         path: "typography",
         name: "Typography",
         component: Typography
-      },
-      {
-        path: "icons",
-        name: "Icons",
-        component: Icons
       },
       {
         path: "notifications",

@@ -7,10 +7,14 @@
         <md-card>
           <md-card-header data-background-color="green">
             <h4 class="title">监听记录</h4>
-            <p class="category">实时更新~~</p>
+            <p class="category">非实时更新，如数据有误，请尝试手动刷新~~</p>
           </md-card-header>
           <md-card-content>
-            <md-table v-model="stocks" table-header-color="green">
+            <md-table
+              v-model="stocks"
+              table-header-color="green"
+              style="max-height: 600px;overflow: auto;"
+            >
               <md-table-row slot="md-table-row" slot-scope="{ item, index }">
                 <md-table-cell md-label="#">{{ index }}</md-table-cell>
                 <md-table-cell md-label="股票代码">
@@ -37,7 +41,12 @@
                   {{ new Date(item.updated_at).format("yyyy-MM-dd hh:mm:ss") }}
                 </md-table-cell>
                 <md-table-cell md-label="">
-                  <md-button class="md-info">查看对应订单</md-button>
+                  <md-button
+                    class="md-info"
+                    @click="$router.push('/orderList/' + item.id)"
+                  >
+                    查看对应订单
+                  </md-button>
                 </md-table-cell>
               </md-table-row>
             </md-table>
@@ -66,9 +75,7 @@ export default {
           console.log(stocks);
           that.stocks = stocks;
         })
-        .catch(function(error) {
-          console.log(error);
-        });
+        .catch(function(error) {});
     }
   },
   activated() {

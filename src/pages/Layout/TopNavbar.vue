@@ -2,7 +2,16 @@
   <md-toolbar md-elevation="0" class="md-transparent">
     <div class="md-toolbar-row">
       <div class="md-toolbar-section-start">
-        <h3 class="md-title">{{ $route.name }}</h3>
+        <h3 class="md-title">
+          <a
+            class="material-icons"
+            style="cursor: pointer;margin-right: 5px;"
+            @click="$router.back()"
+          >
+            keyboard_backspace
+          </a>
+          {{ $route.name }}
+        </h3>
       </div>
       <div class="md-toolbar-section-end">
         <md-button
@@ -26,7 +35,7 @@
             </md-autocomplete>
           </div>
           <md-list>
-            <md-list-item href="#/">
+            <md-list-item href="#/dashboard">
               <i class="material-icons">dashboard</i>
               <p class="hidden-lg hidden-md">Dashboard</p>
             </md-list-item>
