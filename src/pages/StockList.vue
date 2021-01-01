@@ -29,7 +29,7 @@
                   {{ item.profit }}
                 </md-table-cell>
                 <md-table-cell md-label="监听策略名">
-                  {{ item.strategyName }}
+                  {{ item.strategyName.replace(/.*?_/, "") }}
                 </md-table-cell>
                 <md-table-cell md-label="监听频率(s)">
                   {{ item.monitor_freq }}

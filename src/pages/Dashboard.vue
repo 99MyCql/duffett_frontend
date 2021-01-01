@@ -214,11 +214,14 @@
                 <md-table-cell md-label="股票名">
                   {{ item.StockName }}
                 </md-table-cell>
-                <md-table-cell md-label="策略名">
-                  {{ item.StrategyName }}
+                <md-table-cell md-label="交易单价">
+                  {{ item.Price }}
                 </md-table-cell>
                 <md-table-cell md-label="交易金额">
                   {{ item.Money }}
+                </md-table-cell>
+                <md-table-cell md-label="策略名">
+                  {{ item.StrategyName.replace(/.*?_/, "") }}
                 </md-table-cell>
                 <md-table-cell md-label="创建时间">
                   {{ item.CreatedAt }}
@@ -240,8 +243,17 @@
         <div style="width: 80%;margin: 0px 10% 10px;">
           <md-field>
             <label>策略</label>
-            <md-select v-model="startMonitorData.strategy_name">
-              <md-option value="随机策略">随机策略</md-option>
+            <md-select
+              v-if="strategiesLoad"
+              v-model="startMonitorData.strategy_name"
+            >
+              <md-option
+                v-for="(item, index) in strategies"
+                :key="index"
+                :value="item.Name"
+              >
+                {{ item.Name.replace(/.*?_/, "") }}
+              </md-option>
             </md-select>
           </md-field>
           <md-field>
@@ -251,6 +263,16 @@
               <md-option :value="5">5s</md-option>
               <md-option :value="10">10s</md-option>
               <md-option :value="30">30s</md-option>
+              <md-option :value="60">1min</md-option>
+              <md-option :value="5 * 60">5min</md-option>
+              <md-option :value="10 * 60">10min</md-option>
+              <md-option :value="30 * 60">30min</md-option>
+              <md-option :value="60 * 60">1h</md-option>
+              <md-option :value="2 * 60 * 60">2h</md-option>
+              <md-option :value="5 * 60 * 60">5h</md-option>
+              <md-option :value="10 * 60 * 60">10h</md-option>
+              <md-option :value="24 * 60 * 60">1day</md-option>
+              <md-option :value="7 * 24 * 60 * 60">7day</md-option>
             </md-select>
           </md-field>
         </div>
@@ -363,6 +385,7 @@ import tushareApi from "@/api/tushare";
 import newMonitorWS from "@/api/monitor";
 import rspDataFilter from "@/api/rspDataFilter";
 import { getMonitoringStocks as getMS } from "@/api/stock";
+import { getStrategies as getStra } from "@/api/strategy";
 
 export default {
   components: {
@@ -454,7 +477,9 @@ export default {
         dialog: false,
         monitoringStocksId: 0,
         ts_code: ""
-      }
+      },
+      strategies: [],
+      strategiesLoad: false
     };
   },
   methods: {
@@ -597,6 +622,17 @@ export default {
         1
       );
       console.log(this.monitoringStocks);
+    },
+    getStrategies() {
+      let that = this;
+      getStra()
+        .then(function(resp) {
+          that.strategies = resp.data.data;
+          that.strategiesLoad = true;
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
     }
   },
   created() {
@@ -606,6 +642,7 @@ export default {
     this.getStocks();
     this.getMonitoringStocks();
     this.initMonitorWS();
+    this.getStrategies();
   }
 };
 </script>
