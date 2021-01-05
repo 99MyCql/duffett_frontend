@@ -4,7 +4,8 @@ import Dashboard from "@/pages/Dashboard.vue";
 import UserProfile from "@/pages/UserProfile.vue";
 import StockList from "@/pages/StockList.vue";
 import OrderList from "@/pages/OrderList.vue";
-import Typography from "@/pages/Typography.vue";
+import StrategyList from "@/pages/StrategyList.vue";
+import StrategyEdit from "@/pages/StrategyEdit.vue";
 import Notifications from "@/pages/Notifications.vue";
 import Login from "@/pages/Login.vue";
 import Register from "@/pages/Register.vue";
@@ -37,9 +38,14 @@ const routes = [
         props: true
       },
       {
-        path: "typography",
-        name: "Typography",
-        component: Typography
+        path: "strategyList",
+        name: "策略管理",
+        component: StrategyList
+      },
+      {
+        path: "strategyEdit",
+        name: "策略编辑",
+        component: StrategyEdit
       },
       {
         path: "notifications",

@@ -12,7 +12,7 @@ const NotificationStore = {
   addNotification(notification) {
     notification.timestamp = new Date();
     notification.timestamp.setMilliseconds(
-      notification.timestamp.getMilliseconds() + this.state.length
+      notification.timestamp.getMilliseconds() + 1000 + this.state.length
     );
     this.state.push(notification);
   },

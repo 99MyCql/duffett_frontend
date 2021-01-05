@@ -20,9 +20,9 @@
         <md-icon>content_paste</md-icon>
         <p>监听记录</p>
       </sidebar-link>
-      <sidebar-link to="/typography">
+      <sidebar-link to="/strategyList">
         <md-icon>library_books</md-icon>
-        <p>策略配置</p>
+        <p>策略管理</p>
       </sidebar-link>
       <!-- <sidebar-link to="/icons">
         <md-icon>bubble_chart</md-icon>

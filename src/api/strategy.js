@@ -19,3 +19,15 @@ export const update = function(id, desc, content) {
     content
   });
 };
+
+export const delet = function(strategyId) {
+  return axios.post("/api/v1/strategy/delete", {
+    strategyId
+  });
+};
+
+export const testExec = function(name) {
+  return axios.post("/api/v1/strategy/testExec", {
+    name
+  });
+};
