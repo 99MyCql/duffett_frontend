@@ -1,7 +1,7 @@
 import store from "@/store/store";
 import VUE from "../main";
 
-const wsuri = "ws://localhost:8080/api/v1/monitor/ws";
+const wsuri = "ws://" + window.location.host + "/api/v1/monitor/ws";
 
 var ws;
 

@@ -1,10 +1,9 @@
 {
-  "name": "vue-material-dashboard",
-  "version": "1.4.0",
+  "name": "duffett-frontend",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --open",
-    "dev": "npm run serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },

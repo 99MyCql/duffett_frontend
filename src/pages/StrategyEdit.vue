@@ -71,7 +71,7 @@
               <div class="md-layout-item md-small-size-100 md-size-100">
                 <md-field>
                   <label>测试输出</label>
-                  <md-input v-model="output" type="text" disabled></md-input>
+                  <md-textarea v-model="output" disabled></md-textarea>
                 </md-field>
               </div>
             </div>
@@ -173,7 +173,10 @@ export default {
         Desc: null,
         Content: ""
       };
-    else this.strategy = this.$route.query.strategy;
+    else {
+      this.strategy = this.$route.query.strategy;
+      this.strategy.Name = this.strategy.Name.replace(/.*?_/, "");
+    }
   }
 };
 </script>

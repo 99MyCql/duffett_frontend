@@ -330,6 +330,7 @@
                           startMonitorData.stocksId = index;
                           startMonitorData.ts_code = item[0];
                           startMonitorData.dialog = true;
+                          getStrategies();
                         "
                       >
                         <md-icon>add</md-icon>
@@ -642,7 +643,6 @@ export default {
     this.getStocks();
     this.getMonitoringStocks();
     this.initMonitorWS();
-    this.getStrategies();
   }
 };
 </script>

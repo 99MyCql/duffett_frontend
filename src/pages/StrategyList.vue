@@ -19,7 +19,7 @@
           <md-button
             class="md-primary"
             @click="
-              deleteStrategy(item.ID);
+              deleteStrategy();
               deleteDialog = false;
             "
           >
@@ -59,7 +59,13 @@
                   <md-button class="md-info" @click="toStrategyEdit(item)">
                     查看/修改
                   </md-button>
-                  <md-button class="md-danger" @click="deleteDialog = true">
+                  <md-button
+                    class="md-danger"
+                    @click="
+                      deleteID = item.ID;
+                      deleteDialog = true;
+                    "
+                  >
                     删除
                   </md-button>
                 </md-table-cell>
@@ -79,6 +85,7 @@ export default {
   data() {
     return {
       strategies: [],
+      deleteID: null,
       deleteDialog: false
     };
   },
@@ -101,9 +108,9 @@ export default {
         }
       });
     },
-    deleteStrategy(strategyId) {
+    deleteStrategy() {
       let that = this;
-      delet(strategyId)
+      delet(that.deleteID)
         .then(function(resp) {
           that.getStrategies();
         })
